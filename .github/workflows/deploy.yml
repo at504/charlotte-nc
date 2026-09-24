@@ -1,4 +1,4 @@
-name: Deploy Vite App to GitHub Pages
+name: Deploy Website to GitHub Pages
 
 on:
   push:
@@ -7,44 +7,42 @@ on:
       - master
   workflow_dispatch:
 
+# Permissions for GitHub Pages deployment
 permissions:
   contents: read
   pages: write
   id-token: write
 
+# Allow only one concurrent deployment
 concurrency:
   group: 'pages'
   cancel-in-progress: false
 
 jobs:
+  # Job 1: Build project
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js 20
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Install Dependencies
-        run: npm install --legacy-peer-deps
+      - name: Install dependencies
+        run: npm install
 
-      - name: Build Production Bundle
+      - name: Build site
         run: npm run build
 
-      - name: Create 404 Fallback
-        run: cp ./dist/index.html ./dist/404.html
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload GitHub Pages Artifact
+      - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: './dist'
 
+  # Job 2: Separate Deploy job (GitHub Pages API ke liye compulsory hai)
   deploy:
     environment:
       name: github-pages
